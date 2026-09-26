@@ -713,7 +713,8 @@ class ActionObservation(Task):
 class DemandGrid(Task):
     def __init__(self, info, screen, ttl_clock, const, subj_id):
         super().__init__(info, screen, ttl_clock, const, subj_id)
-        self.square_size = 1.5
+        #self.square_size = 1.5
+        self.square_size = 100 # to match PTB script (Jin)
         self.feedback_type = 'acc+rt'
 
     def init_task(self):
@@ -740,11 +741,21 @@ class DemandGrid(Task):
         """Creates the grid of squares for the DemandGrid task, lighting up specific squares blue if a sequence is given,
         and positions the grid left, right, or center."""
         # Calculate offsets based on the desired position
+        # if position == 'left':
+        #     offset_x = -5
+        # elif position == 'right':
+        #     offset_x = 5
+        # else:  # center
+        #     offset_x = 0
+        
+        # but answers at -25% and 25% of the screen center
+        #window_width = float(self.window.size[0])
+        window_width = float(self.window.clientSize[0])
         if position == 'left':
-            offset_x = -5
+            offset_x = -window_width / 4
         elif position == 'right':
-            offset_x = 5
-        else:  # center
+            offset_x = window_width / 4
+        else:
             offset_x = 0
 
         # Center the grid vertically
@@ -756,15 +767,28 @@ class DemandGrid(Task):
             row = []
             for j in range(grid_size[1]):
                 # Calculate position with the offsets
-                square_x = (j - grid_size[0] / 2 + 0.5) * self.square_size + offset_x
-                square_y = (grid_size[1] / 2 - i - 0.5) * self.square_size + offset_y
-
+                # square_x = (j - grid_size[0] / 2 + 0.5) * self.square_size + offset_x
+                # square_y = (grid_size[1] / 2 - i - 0.5) * self.square_size + offset_y
+                
+                square_x = (j - grid_size[1] / 2 + 0.5) * self.square_size + offset_x
+                square_y = (grid_size[0] / 2 - i - 0.5) * self.square_size + offset_y
                 # Determine the fill color based on the sequence
                 fill_color = 'blue' if sequence and (i, j) in sequence else 'white'
 
-                rect = visual.Rect(self.window, width=self.square_size, height=self.square_size,
-                                   pos=(square_x, square_y), lineWidth=3,
-                                   lineColor='black', fillColor=fill_color)
+                # rect = visual.Rect(self.window, width=self.square_size, height=self.square_size,
+                #                    pos=(square_x, square_y), lineWidth=3,
+                #                    lineColor='black', fillColor=fill_color)
+                
+                rect = visual.Rect(
+                    self.window,
+                    units='pix',
+                    width=self.square_size,
+                    height=self.square_size,
+                    pos=(square_x, square_y),
+                    lineWidth=2,
+                    lineColor='black',
+                    fillColor=fill_color,
+                )
                 rect.draw()
                 row.append(rect)
             grid.append(row)
@@ -878,7 +902,8 @@ class Reading(Task):
 
         #show words seqeuntially each for 450ms
         for word in words:
-            word_stim = visual.TextStim(self.window, text=word, pos=(0.0, 0.0), color=(-1, -1, -1), units='deg', height=2)
+            #word_stim = visual.TextStim(self.window, text=word, pos=(0.0, 0.0), color=(-1, -1, -1), units='deg', height=2)
+            word_stim = visual.TextStim(self.window, text=word, pos=(0.0, 0.0), color=(-1, -1, -1), units='pix', height=100,wrapWidth=float(self.window.clientSize[0]) * 0.95,alignText='center',anchorHoriz='center',anchorVert='center')
             word_stim.draw()
             self.flip()
             self.ttl_clock.wait_until(self.ttl_clock.get_time() + 0.45)
